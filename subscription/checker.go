@@ -21,7 +21,7 @@ func CheckOutDatedSubscriptionTypes(db *gorm.DB, max_workers int) {
 
 	subTypeChan := make(chan database.SubscriptionType)
 	var wg sync.WaitGroup
-	for i := 1; i <= 1; i++ {
+	for i := 1; i <= max_workers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -69,4 +69,3 @@ func checkSubTypesWorker(db *gorm.DB, subTypeChan chan database.SubscriptionType
 	}
 	return
 }
-
