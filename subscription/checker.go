@@ -3,7 +3,8 @@ package subscription
 // checks subscription types for new items
 // dispatches those items to their destinations
 import (
-	"github.com/plally/subscription_api/storage"
+	"github.com/jinzhu/gorm"
+	"github.com/plally/subscription_api/database"
 	log "github.com/sirupsen/logrus"
 	"sort"
 	"sync"
@@ -12,8 +13,13 @@ import (
 // the glue that holds my sphagetti together
 
 // gets new items from a subscription type
-func CheckOutDatedSubscriptionTypes(db storage.SubscriptionDatabase, max_workers int) {
-	subTypeChan := db.SubscriptionType_Get(1000)
+func CheckOutDatedSubscriptionTypes(db *gorm.DB, max_workers int) {
+	var subTypes []database.SubscriptionType
+	db.Limit(1000).Order("updated_at", true).Find(&subTypes)
+
+	log.Debugf("CheckOutDatedSubscriptionTypes: found %v subtypes", len(subTypes))
+
+	subTypeChan := make(chan database.SubscriptionType)
 	var wg sync.WaitGroup
 	for i := 1; i <= max_workers; i++ {
 		wg.Add(1)
@@ -22,12 +28,16 @@ func CheckOutDatedSubscriptionTypes(db storage.SubscriptionDatabase, max_workers
 			checkSubTypesWorker(db, subTypeChan)
 		}()
 	}
-	wg.Wait()
 
+	for _, subType := range subTypes {
+		subTypeChan <- subType
+	}
+	close(subTypeChan)
+	wg.Wait()
 }
 
 // does the actual work for CheckOutDatedSubscriptionTypes
-func checkSubTypesWorker(db storage.SubscriptionDatabase, subTypeChan chan storage.SubscriptionType) {
+func checkSubTypesWorker(db *gorm.DB, subTypeChan chan database.SubscriptionType) {
 	for subType := range subTypeChan {
 		handler := GetSubTypeHandler(subType.Type)
 		if handler == nil {
@@ -39,15 +49,19 @@ func checkSubTypesWorker(db storage.SubscriptionDatabase, subTypeChan chan stora
 
 		sort.Slice(items, func(i, j int) bool { return items[i].TimeID < items[j].TimeID })
 
+		log.Debugf("found %v items", len(items))
 		var wg sync.WaitGroup
-		for dest := range db.Subscription_GetWithDestination_BySubType(subType.ID) {
+		db.Where("subscription_type_id=?", subType.ID).Preload("Destination").
+			Joins("JOIN destinations ON subscriptions.destination_id = destinations.id").
+			Find(&subType.Subscriptions)
 
+		for _, sub := range subType.Subscriptions {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				dest.LastItem = dispatch(dest, items)
+				sub.LastItem = dispatch(sub, items)
 
-				db.Subscription_Update(dest)
+				db.Save(&sub)
 			}()
 
 		}
@@ -55,4 +69,3 @@ func checkSubTypesWorker(db storage.SubscriptionDatabase, subTypeChan chan stora
 	}
 	return
 }
-
