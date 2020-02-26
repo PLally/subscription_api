@@ -57,13 +57,12 @@ func checkSubTypesWorker(db *gorm.DB, subTypeChan chan database.SubscriptionType
 			Find(&subType.Subscriptions)
 
 		for _, sub := range subType.Subscriptions {
-			s := sub
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				s.LastItem = dispatch(s, items)
+				sub.LastItem = dispatch(sub, items)
 
-				db.Save(&s)
+				db.Save(&sub)
 			}()
 
 		}
