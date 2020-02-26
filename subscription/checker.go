@@ -1,4 +1,5 @@
 package subscription
+
 // this package contains much of the logic
 // checks subscription types for new items
 // dispatches those items to their destinations
@@ -56,12 +57,13 @@ func checkSubTypesWorker(db *gorm.DB, subTypeChan chan database.SubscriptionType
 			Find(&subType.Subscriptions)
 
 		for _, sub := range subType.Subscriptions {
+			s := sub
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				sub.LastItem = dispatch(sub, items)
+				s.LastItem = dispatch(s, items)
 
-				db.Save(&sub)
+				db.Save(&s)
 			}()
 
 		}

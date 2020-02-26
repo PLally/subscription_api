@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func startSubscriptionPoller(db *gorm.DB){
+func startSubscriptionPoller(db *gorm.DB) {
 	subscription.CheckOutDatedSubscriptionTypes(db, 10)
-	time.Sleep(time.Second*100)
+	time.Sleep(time.Second * 100)
 }

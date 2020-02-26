@@ -25,7 +25,7 @@ func GetDestinationHandler(destType string) DestinationHandler {
 // dispatches all items in the slice to the subscriptions destination
 func dispatch(sub database.Subscription, items []SubscriptionItem) (mostRecent int64) {
 	if sub.Destination.ID == 0 {
-		log.Warn("Subscription does not include a valid destination %v", sub.ID)
+		log.Warnf("Subscription does not include a valid destination %v", sub.ID)
 		return
 	}
 	mostRecent = sub.LastItem

@@ -12,10 +12,10 @@ type config struct {
 }
 
 type databaseConfig struct {
-	Address string
-	Port string
-	User string
-	Password string
+	Address      string
+	Port         string
+	User         string
+	Password     string
 	DatabaseName string
 }
 

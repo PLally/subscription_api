@@ -17,9 +17,10 @@ func makedb(config databaseConfig) *gorm.DB {
 	)
 
 	db, err := gorm.Open("postgres", psqlInfo)
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 	logrus.SetLevel(logrus.DebugLevel)
 	db = db.LogMode(true)
 	return db
 }
-

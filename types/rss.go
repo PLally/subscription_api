@@ -1,4 +1,4 @@
-package sub_types
+package types
 
 import (
 	"github.com/mmcdole/gofeed"
@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func init() {
+func RegisterRSS() {
 	subscription.SetSubTypeHandler("rss", &RSSHandler{})
 }
 
@@ -26,7 +26,6 @@ func (r *RSSHandler) GetNewItems(tags string) []subscription.SubscriptionItem {
 		log.Error(err)
 		log.Debug(tags)
 	}
-
 
 	for _, item := range feed.Items {
 		sub_item := subscription.SubscriptionItem{

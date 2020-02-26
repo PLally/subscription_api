@@ -38,10 +38,9 @@ func (db subscriptionServer) createHandler(getModel func() interface{}) http.Han
 
 		w.WriteHeader(http.StatusCreated)
 		w.Write(data)
-
 	}
 }
 
 func (db subscriptionServer) indexHandler(getModel interface{}) {
-
+	
 }
