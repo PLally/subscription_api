@@ -19,7 +19,7 @@ type Subscription struct {
 	gorm.Model
 	Destination        Destination
 	SubscriptionType   SubscriptionType
-	DestinationID      int64
-	SubscriptionTypeID int64
+	DestinationID      uint
+	SubscriptionTypeID uint
 	LastItem           int64
 }
