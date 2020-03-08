@@ -40,22 +40,13 @@ func CheckOutDatedSubscriptionTypes(db *gorm.DB, max_workers int) {
 // does the actual work for CheckOutDatedSubscriptionTypes
 func checkSubTypesWorker(db *gorm.DB, subTypeChan chan database.SubscriptionType) {
 	for subType := range subTypeChan {
-		handler := GetSubTypeHandler(subType.Type)
-		if handler == nil {
-			log.Warnf("Unrecognized sub type %v", subType.Type)
-			continue
-		}
-		log.Infof("Fetching New items for %v:%v", handler.GetType(), subType.Tags)
-		items := handler.GetNewItems(subType.Tags)
-
-		sort.Slice(items, func(i, j int) bool { return items[i].TimeID < items[j].TimeID })
-
+		items := getItemsForSubType(subType)
 		log.Debugf("found %v items", len(items))
-		var wg sync.WaitGroup
+
 		db.Where("subscription_type_id=?", subType.ID).Preload("Destination").
 			Joins("JOIN destinations ON subscriptions.destination_id = destinations.id").
 			Find(&subType.Subscriptions)
-
+		var wg sync.WaitGroup
 		for _, sub := range subType.Subscriptions {
 			wg.Add(1)
 			go func() {
@@ -69,4 +60,18 @@ func checkSubTypesWorker(db *gorm.DB, subTypeChan chan database.SubscriptionType
 		wg.Wait()
 	}
 	return
+}
+
+func getItemsForSubType(subType database.SubscriptionType) ([]SubscriptionItem) {
+	handler := GetSubTypeHandler(subType.Type)
+	if handler == nil {
+		log.Warnf("Unrecognized sub type %v", subType.Type)
+		return []SubscriptionItem{}
+	}
+	log.Infof("Fetching New items for %v:%v", handler.GetType(), subType.Tags)
+	items := handler.GetNewItems(subType.Tags)
+
+	sort.Slice(items, func(i, j int) bool { return items[i].TimeID < items[j].TimeID })
+
+	return items
 }
