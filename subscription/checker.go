@@ -73,5 +73,9 @@ func getItemsForSubType(subType database.SubscriptionType) ([]SubscriptionItem) 
 
 	sort.Slice(items, func(i, j int) bool { return items[i].TimeID < items[j].TimeID })
 
+	for _, item := range items {
+		item.Type =  subType.Type
+		item.Tags    =  subType.Tags
+	}
 	return items
 }

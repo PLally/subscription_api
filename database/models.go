@@ -19,7 +19,7 @@ type Subscription struct {
 	gorm.Model
 	Destination        Destination
 	SubscriptionType   SubscriptionType
-	DestinationID      uint
-	SubscriptionTypeID uint
+	DestinationID      uint `gorm:"unique_index:idx_destination_subtype"`
+	SubscriptionTypeID uint `gorm:"unique_index:idx_destination_subtype"`
 	LastItem           int64
 }

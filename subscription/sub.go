@@ -6,6 +6,8 @@ type SubscriptionItem struct {
 	Image       string
 	Author      string
 	Description string
+	Tags        string
+	Type     string
 	TimeID      int64 // must be some sort of identifier that increases with time
 }
 

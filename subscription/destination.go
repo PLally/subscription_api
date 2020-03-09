@@ -36,7 +36,7 @@ func dispatch(sub database.Subscription, items []SubscriptionItem) (mostRecent i
 
 		handler := GetDestinationHandler(sub.Destination.DestinationType)
 		if handler == nil {
-			log.Infof("Unrecognized destination handler %v", sub.Destination.DestinationType)
+			log.Warnf("Unrecognized destination handler %v", sub.Destination.DestinationType)
 			return
 		}
 		handler.Dispatch(sub.Destination.ExternalIdentifier, item)
