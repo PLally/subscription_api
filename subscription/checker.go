@@ -62,7 +62,7 @@ func checkSubTypesWorker(db *gorm.DB, subTypeChan chan database.SubscriptionType
 	return
 }
 
-func getItemsForSubType(subType database.SubscriptionType) ([]SubscriptionItem) {
+func getItemsForSubType(subType database.SubscriptionType) []SubscriptionItem {
 	handler := GetSubTypeHandler(subType.Type)
 	if handler == nil {
 		log.Warnf("Unrecognized sub type %v", subType.Type)
@@ -73,9 +73,10 @@ func getItemsForSubType(subType database.SubscriptionType) ([]SubscriptionItem) 
 
 	sort.Slice(items, func(i, j int) bool { return items[i].TimeID < items[j].TimeID })
 
-	for _, item := range items {
-		item.Type =  subType.Type
-		item.Tags    =  subType.Tags
+	for k, item := range items {
+		item.Type = subType.Type
+		item.Tags = subType.Tags
+		items[k] = item
 	}
 	return items
 }
