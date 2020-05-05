@@ -14,6 +14,9 @@ import (
 	"testing"
 )
 
+// TODO write auth tests
+// TODO write tests using full gorilla mux router
+
 func maketestdb() *gorm.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		"127.0.0.1",
