@@ -27,7 +27,7 @@ type Subscription struct {
 	UpdatedAt          time.Time
 	Destination        Destination
 	SubscriptionType   SubscriptionType
-	DestinationID      uint `gorm:"unique_index:idx_destination_subtype"`
-	SubscriptionTypeID uint `gorm:"unique_index:idx_destination_subtype"`
+	DestinationID      uint `gorm:"unique_index:idx_destination_subtype" json:"destination_id"`
+	SubscriptionTypeID uint `gorm:"unique_index:idx_destination_subtype" json:"subscription_type_id"`
 	LastItem           int64
 }

@@ -102,12 +102,20 @@ func (r *E621Handler) Validate(tags string) (string, error) {
 		tag := tagsSplit[i]
 		aliases, _ := r.Session.FindAliases(tag)
 
-		if len(aliases) == 0 {
-			return "", errors.New(fmt.Sprintf("Invalid tag %v", tag))
+		if len(aliases) != 0 {
+			tag = aliases[0].ConsequentName
+			tagsSplit[i] = tag
+			continue
 		}
 
-		tag = aliases[0].ConsequentName
-		tagsSplit[i] = tag
+		tags, _ := r.Session.FindTag(tag)
+		if len(tags) != 0 {
+
+			tagsSplit[i] = tag
+			continue
+		}
+		return "", errors.New(fmt.Sprintf("Invalid tag %v", tag))
+
 	}
 
 	return strings.Join(tagsSplit, " "), nil

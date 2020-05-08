@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/plally/subscription_api/database"
 	"github.com/plally/subscription_api/subscription"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 )
@@ -27,11 +28,14 @@ func CheckSubscriptionType(h http.Handler) (http.Handler) {
 		if handler == nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Invalid subscription type"))
+			return
 		}
 		dbModel.Tags, err = handler.Validate(dbModel.Tags)
 		if err != nil {
+			log.Info(err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Invalid subscription type tags"))
+			return
 		}
 
 		ctx := context.WithValue(r.Context(), "unmarshalled_body", &dbModel)

@@ -102,8 +102,10 @@ github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/plally/e621 v0.0.0-20200416053950-09f3ed5f8f47 h1:6dNzwtlBTq4UhA+PjxYpuVrJIfL2t6MELNbvb1/qcVc=
-github.com/plally/e621 v0.0.0-20200416053950-09f3ed5f8f47/go.mod h1:gy6wt5HGTNaNZ4c5uWRzUt4fb5nG5Yjmb/36lJs+PCk=
+github.com/plally/e621 v0.0.0-20200507062553-895f38a4a556 h1:ZupSx/T9HTcaO1z0VWqPpT8HjTxM2EKAH587MGYdBoo=
+github.com/plally/e621 v0.0.0-20200507062553-895f38a4a556/go.mod h1:gy6wt5HGTNaNZ4c5uWRzUt4fb5nG5Yjmb/36lJs+PCk=
+github.com/plally/e621 v0.0.0-20200507071926-d91da2bde984 h1:a8gQtPC4MKeKckjrLqaY/BWuJ/E6HKHoSLD0cdfTA/A=
+github.com/plally/e621 v0.0.0-20200507071926-d91da2bde984/go.mod h1:gy6wt5HGTNaNZ4c5uWRzUt4fb5nG5Yjmb/36lJs+PCk=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=

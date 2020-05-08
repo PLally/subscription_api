@@ -10,8 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 )
 type Resource struct {
 	Create http.HandlerFunc
@@ -43,7 +45,7 @@ func (resource *Resource) addHandlers(r *mux.Router){
 	name := reflect.TypeOf(resource.model).Name()
 	prefixName := "/" + gorm.ToTableName(name) + "s"
 	r = r.PathPrefix(prefixName).Subrouter()
-	fmt.Println(prefixName)
+	
 	resource.Router = r
 	r.HandleFunc("/{id:[0-9]+}", resource.Get).
 		Methods("GET")
@@ -57,15 +59,42 @@ func (resource *Resource) addHandlers(r *mux.Router){
 	r.Handle("/{id:[0-9]+}", resource.Delete).
 		Methods("DELETE")
 }
+
+func constructWhere(values url.Values, isAllowed func(string) bool) (string, []interface{}) {
+	var conditionValues []interface{}
+	var condition []string
+
+	for k, v := range values {
+		if isAllowed(k) {
+			conditionValues = append(conditionValues, v[0])
+			condition = append(condition, k+"=?")
+		}
+	}
+
+	return strings.Join(condition, " AND "), conditionValues
+}
+
 func indexHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
+	t := reflect.TypeOf(model)
 	modelType := reflect.SliceOf(
-		reflect.TypeOf(model),
+		t,
 	)
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		var dbModel = reflect.New(modelType).Interface()
 
-		DB.Find(dbModel)
+		condition, values := constructWhere(r.URL.Query(), func(s string) bool {
+
+			s = strings.ReplaceAll(s,"_", "")
+			_, ok := t.FieldByNameFunc(func(name string) bool {
+				name = strings.ToLower(name)
+				return name == s
+			})
+			return ok
+		})
+
+		DB.Where(condition, values...).Find(dbModel)
 		writeJson(w, dbModel, http.StatusOK)
 	}
 }
@@ -105,7 +134,6 @@ func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 		unmarshalledBody := r.Context().Value("unmarshalled_body")
 
 		if unmarshalledBody == nil {
-			fmt.Println("Creating database entry")
 			data, _ := ioutil.ReadAll(r.Body)
 			err := json.Unmarshal(data, dbModel)
 			if err != nil {
@@ -117,6 +145,7 @@ func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 			dbModel = unmarshalledBody
 		}
 
+		fmt.Println(dbModel)
 		db := DB.Create(dbModel)
 
 		err := db.Error

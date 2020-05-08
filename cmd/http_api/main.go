@@ -33,7 +33,7 @@ func makedb() *gorm.DB {
 }
 
 func main() {
-
+	log.SetLevel(log.DebugLevel)
 	viper.SetEnvPrefix("SUB_API")
 	viper.SetConfigName("subapi_config")
 
@@ -58,7 +58,6 @@ func main() {
 	resources(r, database.Destination{}, DB)
 	resources(r, database.Subscription{}, DB)
 	resources(r, database.SubscriptionType{}, DB).Use(CheckSubscriptionType)
-
 
 
 	r.Use(
