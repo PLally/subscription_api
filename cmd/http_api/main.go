@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -13,8 +14,14 @@ import (
 	"net/http"
 	"time"
 )
+var noauth = flag.Bool("noauth", false, "dont use any authentication")
+
+func init() {
+	flag.Parse()
+}
 
 func makedb() *gorm.DB {
+
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		viper.GetString("database.host"),
 		viper.GetString("database.port"),
@@ -59,10 +66,13 @@ func main() {
 	resources(r, database.Subscription{}, DB)
 	resources(r, database.SubscriptionType{}, DB).Use(CheckSubscriptionType)
 
-
-	r.Use(
-		auth.AuthMiddleware(viper.GetString("secret")),
-	)
+	if *noauth {
+		log.Warn("Starting with no authentication middleware!!!")
+	} else {
+		r.Use(
+			auth.AuthMiddleware(viper.GetString("secret")),
+		)
+	}
 
 	http.Handle("/", r)
 

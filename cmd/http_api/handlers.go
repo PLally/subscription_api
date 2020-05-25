@@ -145,7 +145,6 @@ func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 			dbModel = unmarshalledBody
 		}
 
-		fmt.Println(dbModel)
 		db := DB.Create(dbModel)
 
 		err := db.Error
@@ -199,6 +198,11 @@ func onDatabaseError(err error, w http.ResponseWriter, name string) {
 	switch err := err.(type) {
 	case *pq.Error:
 		switch err.Code.Name() {
+		case "foreign_key_violation":
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte(
+				"Foreign key violation",
+			))
 		case "unique_violation":
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte(
