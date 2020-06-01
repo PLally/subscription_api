@@ -7,6 +7,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
+	"github.com/plally/subscription_api/database"
+	"github.com/plally/subscription_api/subscription"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -94,7 +96,7 @@ func indexHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 			return ok
 		})
 
-		DB.Where(condition, values...).Find(dbModel)
+		DB.Set("gorm:auto_preload", true).Where(condition, values...).Find(dbModel)
 		writeJson(w, dbModel, http.StatusOK)
 	}
 }
@@ -110,7 +112,7 @@ func getHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 		idString := vars["id"]
 		id, _ := strconv.Atoi(idString)
 
-		db := DB.First(dbModel, id)
+		db := DB.Set("gorm:auto_preload", true).First(dbModel, id)
 		if db.RowsAffected < 1 {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(fmt.Sprintf("%v does not exist", name)))
@@ -184,13 +186,66 @@ func deleteHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	}
 
 }
+
+func subscribeHandler(DB *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, _ := ioutil.ReadAll(r.Body)
+		var subCreateStruct struct{
+			DestType string `json:"destination_type"`
+			DestIdent string `json:"destination_identifier"`
+			SubType string `json:"subscription_type"`
+			SubTags string `json:"subscription_tags"`
+		}
+		_ = json.Unmarshal(data, &subCreateStruct)
+		fmt.Println(string(data))
+		handler := subscription.GetSubTypeHandler(subCreateStruct.SubType)
+		if handler == nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid subscription type"))
+			return
+		}
+		tags, err := handler.Validate(subCreateStruct.SubTags)
+		subCreateStruct.SubTags = tags
+		if err != nil {
+			log.Info(err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid subscription type tags"))
+			return
+		}
+
+		subtype := database.SubscriptionType{
+			Type: subCreateStruct.SubType,
+			Tags: subCreateStruct.SubTags,
+		}
+		dest := database.Destination{
+			DestinationType: subCreateStruct.DestType,
+			ExternalIdentifier: subCreateStruct.DestIdent,
+		}
+
+		DB.FirstOrCreate(&subtype, subtype)
+		DB.FirstOrCreate(&dest, dest)
+
+		sub := database.Subscription{
+			SubscriptionTypeID: subtype.ID,
+			DestinationID: dest.ID,
+		}
+		DB.FirstOrCreate(&sub, sub)
+
+		sub.Destination = dest
+		sub.SubscriptionType = subtype
+		writeJson(w, sub, http.StatusOK)
+	}
+}
+
 func writeJson(w http.ResponseWriter, obj interface{}, status int) {
 	data, err := json.Marshal(obj)
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
+		return
 	}
+	w.WriteHeader(status)
 	w.Write(data)
 }
 

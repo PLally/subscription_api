@@ -77,7 +77,7 @@ func (r *E621Handler) GetNewItems(tags string) []subscription.SubscriptionItem {
 		sub_item := subscription.SubscriptionItem{
 			Title:       fmt.Sprintf("E621 Post #%v", post.ID),
 			Url:         r.Session.PostUrl(post),
-			Description: fmt.Sprintf("Artists %v", strings.Join(post.Tags.Artist, ". ")),
+			Description: post.Description[:minInt(len(post.Description), 500)],
 			Author:      strings.Join(post.Tags.Artist, ", "),
 			TimeID:      int64(post.ID),
 			Image:       post.File.URL,
@@ -119,4 +119,9 @@ func (r *E621Handler) Validate(tags string) (string, error) {
 	}
 
 	return strings.Join(tagsSplit, " "), nil
+}
+
+func minInt(x, y int) int {
+	if x < y { return x }
+	return y
 }

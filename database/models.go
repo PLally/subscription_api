@@ -10,7 +10,7 @@ type SubscriptionType struct {
 	UpdatedAt     time.Time
 	Type          string `gorm:"unique_index:idx_type_tags" json:"type"`
 	Tags          string `gorm:"unique_index:idx_type_tags" json:"tags"`
-	Subscriptions []Subscription
+	Subscriptions []Subscription `gorm:"PRELOAD:false"`
 }
 
 type Destination struct {

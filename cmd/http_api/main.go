@@ -62,9 +62,11 @@ func main() {
 	r := mux.NewRouter()
 
 	DB := makedb()
+	DB.LogMode(true)
 	resources(r, database.Destination{}, DB)
 	resources(r, database.Subscription{}, DB)
 	resources(r, database.SubscriptionType{}, DB).Use(CheckSubscriptionType)
+	r.HandleFunc("/subscribe", subscribeHandler(DB))
 
 	if *noauth {
 		log.Warn("Starting with no authentication middleware!!!")
