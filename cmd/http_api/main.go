@@ -16,10 +16,6 @@ import (
 )
 var noauth = flag.Bool("noauth", false, "dont use any authentication")
 
-func init() {
-	flag.Parse()
-}
-
 func makedb() *gorm.DB {
 
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -40,6 +36,8 @@ func makedb() *gorm.DB {
 }
 
 func main() {
+	flag.Parse()
+
 	log.SetLevel(log.DebugLevel)
 	viper.SetEnvPrefix("SUB_API")
 	viper.SetConfigName("subapi_config")
