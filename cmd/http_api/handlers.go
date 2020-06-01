@@ -17,21 +17,23 @@ import (
 	"strconv"
 	"strings"
 )
+
 type Resource struct {
 	Create http.HandlerFunc
-	Index http.HandlerFunc
+	Index  http.HandlerFunc
 	Delete http.HandlerFunc
-	Get http.HandlerFunc
+	Get    http.HandlerFunc
 
 	Router *mux.Router
-	model interface{}
+	model  interface{}
 }
-func resources(r *mux.Router, model interface{}, DB *gorm.DB) *Resource{
+
+func resources(r *mux.Router, model interface{}, DB *gorm.DB) *Resource {
 	resource := &Resource{
 		Create: createHandler(model, DB),
-		Index: indexHandler(model, DB),
+		Index:  indexHandler(model, DB),
 		Delete: deleteHandler(model, DB),
-		Get: getHandler(model, DB),
+		Get:    getHandler(model, DB),
 
 		model: model,
 	}
@@ -43,11 +45,11 @@ func (resource *Resource) Use(middleware mux.MiddlewareFunc) {
 	resource.Router.Use(middleware)
 }
 
-func (resource *Resource) addHandlers(r *mux.Router){
+func (resource *Resource) addHandlers(r *mux.Router) {
 	name := reflect.TypeOf(resource.model).Name()
 	prefixName := "/" + gorm.ToTableName(name) + "s"
 	r = r.PathPrefix(prefixName).Subrouter()
-	
+
 	resource.Router = r
 	r.HandleFunc("/{id:[0-9]+}", resource.Get).
 		Methods("GET")
@@ -88,7 +90,7 @@ func indexHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 
 		condition, values := constructWhere(r.URL.Query(), func(s string) bool {
 
-			s = strings.ReplaceAll(s,"_", "")
+			s = strings.ReplaceAll(s, "_", "")
 			_, ok := t.FieldByNameFunc(func(name string) bool {
 				name = strings.ToLower(name)
 				return name == s
@@ -132,7 +134,6 @@ func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		var dbModel = reflect.New(modelType).Interface()
 
-
 		unmarshalledBody := r.Context().Value("unmarshalled_body")
 
 		if unmarshalledBody == nil {
@@ -159,7 +160,6 @@ func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-
 		writeJson(w, dbModel, http.StatusCreated)
 	}
 }
@@ -176,8 +176,7 @@ func deleteHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 		idString := vars["id"]
 		id, _ := strconv.Atoi(idString)
 
-		if err := DB.Raw(fmt.Sprintf("DELETE FROM %v WHERE id=? RETURNING *", name), id).Scan(dbModel).Error
-		err != nil {
+		if err := DB.Raw(fmt.Sprintf("DELETE FROM %v WHERE id=? RETURNING *", name), id).Scan(dbModel).Error; err != nil {
 			onDatabaseError(err, w, name)
 			return
 		}
@@ -190,11 +189,11 @@ func deleteHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 func subscribeHandler(DB *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, _ := ioutil.ReadAll(r.Body)
-		var subCreateStruct struct{
-			DestType string `json:"destination_type"`
+		var subCreateStruct struct {
+			DestType  string `json:"destination_type"`
 			DestIdent string `json:"destination_identifier"`
-			SubType string `json:"subscription_type"`
-			SubTags string `json:"subscription_tags"`
+			SubType   string `json:"subscription_type"`
+			SubTags   string `json:"subscription_tags"`
 		}
 		_ = json.Unmarshal(data, &subCreateStruct)
 		fmt.Println(string(data))
@@ -218,7 +217,7 @@ func subscribeHandler(DB *gorm.DB) http.HandlerFunc {
 			Tags: subCreateStruct.SubTags,
 		}
 		dest := database.Destination{
-			DestinationType: subCreateStruct.DestType,
+			DestinationType:    subCreateStruct.DestType,
 			ExternalIdentifier: subCreateStruct.DestIdent,
 		}
 
@@ -227,7 +226,7 @@ func subscribeHandler(DB *gorm.DB) http.HandlerFunc {
 
 		sub := database.Subscription{
 			SubscriptionTypeID: subtype.ID,
-			DestinationID: dest.ID,
+			DestinationID:      dest.ID,
 		}
 		DB.FirstOrCreate(&sub, sub)
 
@@ -270,7 +269,7 @@ func onDatabaseError(err error, w http.ResponseWriter, name string) {
 		}
 	default:
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			w.WriteHeader(http.StatusNotFound,)
+			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("404 not found"))
 		}
 	}

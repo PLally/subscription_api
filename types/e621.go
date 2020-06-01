@@ -87,7 +87,6 @@ func (r *E621Handler) GetNewItems(tags string) []subscription.SubscriptionItem {
 	return items
 }
 
-
 func (r *E621Handler) Validate(tags string) (string, error) {
 	parsed, err := e621.ParseTags(tags, false)
 	if err != nil {
@@ -122,6 +121,8 @@ func (r *E621Handler) Validate(tags string) (string, error) {
 }
 
 func minInt(x, y int) int {
-	if x < y { return x }
+	if x < y {
+		return x
+	}
 	return y
 }

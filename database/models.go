@@ -8,8 +8,8 @@ type SubscriptionType struct {
 	ID            uint `gorm:"primary_key"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	Type          string `gorm:"unique_index:idx_type_tags" json:"type"`
-	Tags          string `gorm:"unique_index:idx_type_tags" json:"tags"`
+	Type          string         `gorm:"unique_index:idx_type_tags" json:"type"`
+	Tags          string         `gorm:"unique_index:idx_type_tags" json:"tags"`
 	Subscriptions []Subscription `gorm:"PRELOAD:false"`
 }
 

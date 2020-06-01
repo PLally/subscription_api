@@ -10,11 +10,11 @@ import (
 	"net/http"
 )
 
-func CheckSubscriptionType(h http.Handler) (http.Handler) {
+func CheckSubscriptionType(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			query :=  r.URL.Query()
+			query := r.URL.Query()
 			tags := query.Get("tags")
 			subtype := query.Get("type")
 

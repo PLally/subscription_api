@@ -35,7 +35,7 @@ func main() {
 	db := makedb()
 
 	for {
-		time.Sleep(10*time.Second)
+		time.Sleep(10 * time.Second)
 		subscription.CheckOutDatedSubscriptionTypes(db, 100)
 	}
 }

@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"time"
 )
+
 var noauth = flag.Bool("noauth", false, "dont use any authentication")
 
 func makedb() *gorm.DB {

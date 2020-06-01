@@ -26,11 +26,11 @@ func (d *DiscordDestinationHandler) Dispatch(id string, item subscription.Subscr
 	message := discordMessage{
 		Content: "",
 		Embed: embed{
-			Title: "Subscription Item",
+			Title:       "Subscription Item",
 			Description: fmt.Sprintf("Author: %v\n%v", item.Author, item.Description),
-			Url: item.Url,
+			Url:         item.Url,
 			Footer: embedFooter{
-				Text: item.Type +" : "+item.Tags,
+				Text: item.Type + " : " + item.Tags,
 			},
 			Image: embedImage{
 				Url: item.Image,
@@ -40,7 +40,9 @@ func (d *DiscordDestinationHandler) Dispatch(id string, item subscription.Subscr
 	channelUrl := fmt.Sprintf("https://discord.com/api/channels/%v/messages", id)
 	data, err := json.Marshal(message)
 	req, err := http.NewRequest("POST", channelUrl, bytes.NewBuffer(data))
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	req.Header.Set("Authorization", viper.GetString("discord_authorization"))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -50,7 +52,7 @@ func (d *DiscordDestinationHandler) Dispatch(id string, item subscription.Subscr
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("non success status code "+resp.Status)
+		return errors.New("non success status code " + resp.Status)
 	}
 	return err
 }

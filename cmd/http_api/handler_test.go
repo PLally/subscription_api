@@ -56,7 +56,6 @@ func TestSubscriptionServer_CreateDestination(t *testing.T) {
 		"discord",
 	})
 
-
 	body := bytes.NewReader(jsonData)
 	req, _ := http.NewRequest("POST", "http://localhost/destinations", body)
 
