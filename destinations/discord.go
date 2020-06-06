@@ -1,14 +1,11 @@
 package destinations
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
 	"github.com/plally/subscription_api/subscription"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"net/http"
 )
 
 func init() {
@@ -22,6 +19,11 @@ func (d *DiscordDestinationHandler) GetType() string {
 }
 
 func (d *DiscordDestinationHandler) Dispatch(id string, item subscription.SubscriptionItem) error {
+	session, err := discordgo.New( viper.GetString("discord_authorization"))
+	if err != nil {
+		return err
+	}
+
 	log.Infof("[Discord Destination]: %v, %v (%v)", id, item.Title, item.Url)
 	message := discordMessage{
 		Content: "",
@@ -38,21 +40,6 @@ func (d *DiscordDestinationHandler) Dispatch(id string, item subscription.Subscr
 		},
 	}
 	channelUrl := fmt.Sprintf("https://discord.com/api/channels/%v/messages", id)
-	data, err := json.Marshal(message)
-	req, err := http.NewRequest("POST", channelUrl, bytes.NewBuffer(data))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", viper.GetString("discord_authorization"))
-	req.Header.Set("Content-Type", "application/json")
-
-	client := http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return errors.New("non success status code " + resp.Status)
-	}
+	_, err = session.Request("POST", channelUrl, message)
 	return err
 }
