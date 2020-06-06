@@ -39,8 +39,10 @@ func dispatch(sub database.Subscription, items []SubscriptionItem) (mostRecent i
 			log.Warnf("Unrecognized destination handler %v", sub.Destination.DestinationType)
 			return
 		}
-		handler.Dispatch(sub.Destination.ExternalIdentifier, item)
-
+		err := handler.Dispatch(sub.Destination.ExternalIdentifier, item)
+		if err != nil {
+			log.Error(err)
+		}
 		if item.TimeID > mostRecent {
 			mostRecent = item.TimeID
 		}
