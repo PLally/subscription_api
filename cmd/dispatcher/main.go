@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 	viper.SetEnvPrefix("SUB_API")
 	viper.SetConfigName("subapi_config")
 
