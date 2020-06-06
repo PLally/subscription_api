@@ -31,7 +31,7 @@ func (r *RSSHandler) GetNewItems(tags string) []subscription.SubscriptionItem {
 		sub_item := subscription.SubscriptionItem{
 			Title:       item.Title,
 			Url:         item.Link,
-			Description: item.Description,
+			Description: "-",
 			Author:      item.Author.Name,
 			TimeID:      item.PublishedParsed.Unix(),
 		}

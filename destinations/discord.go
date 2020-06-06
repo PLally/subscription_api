@@ -26,7 +26,7 @@ func (d *DiscordDestinationHandler) Dispatch(id string, item subscription.Subscr
 	message := discordMessage{
 		Content: "",
 		Embed: embed{
-			Title:       "Subscription Item",
+			Title:       item.Title,
 			Description: fmt.Sprintf("Author: %v\n%v", item.Author, item.Description),
 			Url:         item.Url,
 			Footer: embedFooter{
