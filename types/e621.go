@@ -99,7 +99,13 @@ func (r *E621Handler) Validate(tags string) (string, error) {
 
 	for i := 0; i < tagAmount; i++ {
 		tag := tagsSplit[i]
-		if tag[0] == '-' || tag[0] == '~' {
+		prefix := ""
+		if tag[0] == '-' {
+			prefix = "-"
+			tag = tag[1:]
+		}
+		if tag[0] == '~' {
+			prefix = "~"
 			tag = tag[1:]
 		}
 
@@ -107,14 +113,13 @@ func (r *E621Handler) Validate(tags string) (string, error) {
 
 		if len(aliases) != 0 {
 			tag = aliases[0].ConsequentName
-			tagsSplit[i] = tag
+			tagsSplit[i] = prefix + tag
 			continue
 		}
 
 		tags, _ := r.Session.FindTag(tag)
 		if len(tags) != 0 {
-
-			tagsSplit[i] = tag
+			tagsSplit[i] = prefix + tag
 			continue
 		}
 		return "", errors.New(fmt.Sprintf("Invalid tag %v", tag))
