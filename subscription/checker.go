@@ -63,6 +63,12 @@ func checkSubTypesWorker(db *gorm.DB, subTypeChan chan database.SubscriptionType
 }
 
 func getItemsForSubType(subType database.SubscriptionType) []SubscriptionItem {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("Recovered from a fatal error ", r)
+		}
+	}()
+
 	handler := GetSubTypeHandler(subType.Type)
 	if handler == nil {
 		log.Warnf("Unrecognized sub type %v", subType.Type)
