@@ -99,6 +99,10 @@ func (r *E621Handler) Validate(tags string) (string, error) {
 
 	for i := 0; i < tagAmount; i++ {
 		tag := tagsSplit[i]
+		if tag[0] == '-' || tag[0] == '~' {
+			tag = tag[1:]
+		}
+
 		aliases, _ := r.Session.FindAliases(tag)
 
 		if len(aliases) != 0 {
