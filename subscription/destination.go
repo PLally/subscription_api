@@ -8,7 +8,6 @@ import (
 // a destination that a subscription item can be sent to such as a discord channel
 type DestinationHandler interface {
 	Dispatch(id string, item SubscriptionItem) error
-	GetType() string
 }
 
 // map between destination types and a handler

@@ -16,8 +16,6 @@ var feedWhitelist = map[string]bool{
 
 type RSSHandler struct{}
 
-func (r *RSSHandler) GetType() string { return "rss" }
-
 func (r *RSSHandler) GetNewItems(tags string) []subscription.SubscriptionItem {
 	var items []subscription.SubscriptionItem
 	fp := gofeed.NewParser()

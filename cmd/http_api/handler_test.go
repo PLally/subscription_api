@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
 	"github.com/plally/subscription_api/database"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -26,11 +26,11 @@ func maketestdb() *gorm.DB {
 		"fox_bot_dev",
 	)
 
-	db, err := gorm.Open("postgres", psqlInfo)
+	db, err := gorm.Open(postgres.Open(psqlInfo), nil)
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(false)
+
 	database.Migrate(db)
 	return db
 }

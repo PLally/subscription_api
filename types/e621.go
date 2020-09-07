@@ -6,22 +6,22 @@ import (
 	"github.com/plally/e621"
 	"github.com/plally/subscription_api/subscription"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func RegisterE621() {
+func RegisterE621() *E621Handler {
 	handler := &E621Handler{
 		Session: e621.NewSession("e621.net", "FoxBotSubscriptions/0.1"),
 	}
-	go func() {
-		for {
-			handler.updatePostCache()
-			time.Sleep(time.Minute * 15)
-		}
-	}()
+
+	viper.SetDefault("e621.cache_update_rate", time.Second*30)
+	viper.SetDefault("e621.cache_size", 1000)
+
 	subscription.SetSubTypeHandler("e621", handler)
+	return handler
 }
 
 type E621Handler struct {
@@ -30,8 +30,18 @@ type E621Handler struct {
 	postCache   []*e621.Post
 }
 
+func (e6 *E621Handler) StartPostCacheUpdater() {
+	go func() {
+		for {
+			e6.updatePostCache()
+			time.Sleep(viper.GetDuration("e621.cache_update_rate"))
+		}
+	}()
+
+}
 func (r *E621Handler) updatePostCache() {
-	posts, err := r.getRecentPosts(5000)
+
+	posts, err := r.getRecentPosts(viper.GetInt("e621.cache_size"))
 	if err != nil {
 		log.Error(err)
 	}
@@ -64,8 +74,6 @@ func (r *E621Handler) getRecentPosts(amount int) (posts e621.PostsResponse, err 
 	return
 }
 
-func (r *E621Handler) GetType() string { return "e621" }
-
 func (r *E621Handler) GetNewItems(tags string) []subscription.SubscriptionItem {
 	var items []subscription.SubscriptionItem
 	parsed, _ := e621.ParseTags(tags, false)
@@ -96,9 +104,12 @@ func (r *E621Handler) Validate(tags string) (string, error) {
 	tags = parsed.Normalized()
 	tagsSplit := strings.Split(tags, " ")
 	tagAmount := len(tagsSplit)
-
 	for i := 0; i < tagAmount; i++ {
 		tag := tagsSplit[i]
+		if tag == "" {
+			continue
+		}
+
 		prefix := ""
 		if tag[0] == '-' {
 			prefix = "-"

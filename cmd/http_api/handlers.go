@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
 	"github.com/plally/subscription_api/database"
 	"github.com/plally/subscription_api/subscription"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -37,7 +37,10 @@ func resources(r *mux.Router, model interface{}, DB *gorm.DB) *Resource {
 
 		model: model,
 	}
-	resource.addHandlers(r)
+	name := reflect.TypeOf(resource.model).Name()
+	tableName := DB.NamingStrategy.TableName(name)
+
+	resource.addHandlers(tableName, r)
 	return resource
 }
 
@@ -45,9 +48,8 @@ func (resource *Resource) Use(middleware mux.MiddlewareFunc) {
 	resource.Router.Use(middleware)
 }
 
-func (resource *Resource) addHandlers(r *mux.Router) {
-	name := reflect.TypeOf(resource.model).Name()
-	prefixName := "/" + gorm.ToTableName(name) + "s"
+func (resource *Resource) addHandlers(tableName string, r *mux.Router) {
+	prefixName := "/" + tableName
 	r = r.PathPrefix(prefixName).Subrouter()
 
 	resource.Router = r
@@ -97,24 +99,33 @@ func indexHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 			})
 			return ok
 		})
-
-		DB.Set("gorm:auto_preload", true).Where(condition, values...).Find(dbModel)
+		db := DB.Where(condition, values...)
+		if joinable, ok := model.(database.Joinable); ok {
+			db = joinable.DoJoins(db)
+		}
+		db.Find(dbModel)
 		writeJson(w, dbModel, http.StatusOK)
 	}
 }
 
 func getHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	modelType := reflect.TypeOf(model)
-	name := gorm.ToTableName(modelType.Name())
+	name := DB.NamingStrategy.TableName(modelType.Name())
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		var dbModel = reflect.New(modelType).Interface()
 
 		vars := mux.Vars(r)
 		idString := vars["id"]
 		id, _ := strconv.Atoi(idString)
 
-		db := DB.Set("gorm:auto_preload", true).First(dbModel, id)
+		db := DB
+
+		if joinable, ok := dbModel.(database.Joinable); ok {
+			db = joinable.DoJoins(db)
+		}
+		db = db.First(dbModel, id)
 		if db.RowsAffected < 1 {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(fmt.Sprintf("%v does not exist", name)))
@@ -128,7 +139,7 @@ func getHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 
 func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	modelType := reflect.TypeOf(model)
-	name := gorm.ToTableName(modelType.Name())
+	name := DB.NamingStrategy.TableName(modelType.Name())
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -166,7 +177,7 @@ func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 
 func deleteHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	modelType := reflect.TypeOf(model)
-	name := gorm.ToTableName(modelType.Name()) + "s"
+	name := DB.NamingStrategy.TableName(modelType.Name())
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -190,21 +201,20 @@ func subscribeHandler(DB *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, _ := ioutil.ReadAll(r.Body)
 		var subCreateStruct struct {
-			DestType  string `json:"destination_type"`
-			DestIdent string `json:"destination_identifier"`
-			SubType   string `json:"subscription_type"`
-			SubTags   string `json:"subscription_tags"`
+			DestinationType       string `json:"destination_type"`
+			DestinationIdentifier string `json:"destination_identifier"`
+			SubscriptionType      string `json:"subscription_type"`
+			SubscriptionTags      string `json:"subscription_tags"`
 		}
 		_ = json.Unmarshal(data, &subCreateStruct)
-		fmt.Println(string(data))
-		handler := subscription.GetSubTypeHandler(subCreateStruct.SubType)
+		handler := subscription.GetSubTypeHandler(subCreateStruct.SubscriptionType)
 		if handler == nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Invalid subscription type"))
 			return
 		}
-		tags, err := handler.Validate(subCreateStruct.SubTags)
-		subCreateStruct.SubTags = tags
+		tags, err := handler.Validate(subCreateStruct.SubscriptionTags)
+		subCreateStruct.SubscriptionTags = tags
 		if err != nil {
 			log.Info(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -213,12 +223,12 @@ func subscribeHandler(DB *gorm.DB) http.HandlerFunc {
 		}
 
 		subtype := database.SubscriptionType{
-			Type: subCreateStruct.SubType,
-			Tags: subCreateStruct.SubTags,
+			Type: subCreateStruct.SubscriptionType,
+			Tags: subCreateStruct.SubscriptionTags,
 		}
 		dest := database.Destination{
-			DestinationType:    subCreateStruct.DestType,
-			ExternalIdentifier: subCreateStruct.DestIdent,
+			DestinationType:    subCreateStruct.DestinationType,
+			ExternalIdentifier: subCreateStruct.DestinationIdentifier,
 		}
 
 		DB.FirstOrCreate(&subtype, subtype)
@@ -228,11 +238,13 @@ func subscribeHandler(DB *gorm.DB) http.HandlerFunc {
 			SubscriptionTypeID: subtype.ID,
 			DestinationID:      dest.ID,
 		}
-		DB.FirstOrCreate(&sub, sub)
-
+		status := http.StatusOK
+		if DB.FirstOrCreate(&sub, sub).RowsAffected == 0 {
+			status = http.StatusConflict
+		}
 		sub.Destination = dest
 		sub.SubscriptionType = subtype
-		writeJson(w, sub, http.StatusOK)
+		writeJson(w, sub, status)
 	}
 }
 
@@ -265,7 +277,6 @@ func onDatabaseError(err error, w http.ResponseWriter, name string) {
 		default:
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Code.Name()))
-
 		}
 	default:
 		if errors.Is(err, gorm.ErrRecordNotFound) {

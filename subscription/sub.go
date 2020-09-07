@@ -8,11 +8,10 @@ type SubscriptionItem struct {
 	Description string
 	Tags        string
 	Type        string
-	TimeID      int64 // must be some sort of identifier that increases with time
+	TimeID      int64 // integer that determines e.g. a created time or post id
 }
 
 type SubscriptionTypeHandler interface {
-	GetType() string
 	GetNewItems(tags string) []SubscriptionItem
 	Validate(tags string) (string, error)
 }
