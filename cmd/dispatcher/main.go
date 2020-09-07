@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"github.com/plally/subscription_api/database"
 	_ "github.com/plally/subscription_api/destinations"
@@ -10,6 +9,9 @@ import (
 	"github.com/plally/subscription_api/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"time"
 )
 
@@ -17,7 +19,7 @@ func main() {
 	log.SetLevel(log.InfoLevel)
 	viper.SetEnvPrefix("SUB_API")
 	viper.SetConfigName("subapi_config")
-
+	viper.SetDefault("dispatcher.delay", "1m")
 	viper.AutomaticEnv()
 
 	viper.SetConfigType("yaml")
@@ -29,14 +31,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	types.RegisterE621()
+	types.RegisterE621().StartPostCacheUpdater()
 	types.RegisterRSS()
 
 	db := makedb()
 
 	for {
-		time.Sleep(10 * time.Second)
-		subscription.CheckOutDatedSubscriptionTypes(db, 100)
+		time.Sleep(viper.GetDuration("dispatcher.delay"))
+
+		err = subscription.CheckOutDatedSubscriptionTypes(db, 100)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 }
 
@@ -51,11 +57,17 @@ func makedb() *gorm.DB {
 		viper.GetString("database.dbname"),
 	)
 
-	db, err := gorm.Open("postgres", psqlInfo)
+	db, err := gorm.Open(
+		postgres.Open(psqlInfo),
+		&gorm.Config{Logger: logger.New(log.StandardLogger(), logger.Config{
+			SlowThreshold: 0,
+			Colorful:      false,
+			LogLevel:      logger.Info,
+		})})
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(false)
+
 	database.Migrate(db)
 	return db
 }

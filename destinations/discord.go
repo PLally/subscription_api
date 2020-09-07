@@ -19,7 +19,7 @@ func (d *DiscordDestinationHandler) GetType() string {
 }
 
 func (d *DiscordDestinationHandler) Dispatch(id string, item subscription.SubscriptionItem) error {
-	session, err := discordgo.New( viper.GetString("discord_authorization"))
+	session, err := discordgo.New(viper.GetString("discord_authorization"))
 	if err != nil {
 		return err
 	}

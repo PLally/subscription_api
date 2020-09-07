@@ -4,18 +4,20 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"github.com/plally/subscription_api/database"
 	"github.com/plally/subscription_api/internal/auth"
 	"github.com/plally/subscription_api/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"net/http"
 	"time"
 )
 
-var noauth = flag.Bool("noauth", false, "dont use any authentication")
+var noauth = flag.Bool("noauth", true, "dont use any authentication")
 
 func makedb() *gorm.DB {
 
@@ -26,12 +28,18 @@ func makedb() *gorm.DB {
 		viper.GetString("database.password"),
 		viper.GetString("database.dbname"),
 	)
-
-	db, err := gorm.Open("postgres", psqlInfo)
+	db, err := gorm.Open(
+		postgres.Open(psqlInfo),
+		&gorm.Config{Logger: logger.New(log.StandardLogger(), logger.Config{
+			SlowThreshold: 0,
+			Colorful:      false,
+			LogLevel:      logger.Info,
+		})},
+	)
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(false)
+
 	database.Migrate(db)
 	return db
 }
@@ -61,7 +69,7 @@ func main() {
 	r := mux.NewRouter()
 
 	DB := makedb()
-	DB.LogMode(true)
+
 	resources(r, database.Destination{}, DB)
 	resources(r, database.Subscription{}, DB)
 	resources(r, database.SubscriptionType{}, DB).Use(CheckSubscriptionType)
