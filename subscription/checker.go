@@ -89,7 +89,7 @@ func getSubscriptionTypeItems(subType database.SubscriptionType) []SubscriptionI
 		return []SubscriptionItem{}
 	}
 
-	log.Infof("Fetching New items for %v:%v", subType.String())
+	log.Infof("Fetching New items for %v", subType.String())
 	items := typeHandler.GetNewItems(subType.Tags)
 
 	sort.Slice(items, func(i, j int) bool { return items[i].TimeID < items[j].TimeID })
