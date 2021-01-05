@@ -66,7 +66,6 @@ func main() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	viper.AutomaticEnv()
 
-
 	types.RegisterE621()
 	types.RegisterRSS()
 
