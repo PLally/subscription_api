@@ -12,25 +12,29 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"strings"
 	"time"
 )
 
 func main() {
 	log.SetLevel(log.InfoLevel)
-	viper.SetEnvPrefix("SUB_API")
+
 	viper.SetConfigName("subapi_config")
-	viper.SetDefault("dispatcher.delay", "1m")
-	viper.AutomaticEnv()
 
 	viper.SetConfigType("yaml")
 
 	viper.AddConfigPath("/etc/subscription_api")
 	viper.AddConfigPath(".")
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err)
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			log.Fatal(err)
+		}
 	}
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
+	viper.AutomaticEnv()
+
 	types.RegisterE621().StartPostCacheUpdater()
 	types.RegisterRSS()
 
@@ -39,7 +43,7 @@ func main() {
 	for {
 		time.Sleep(viper.GetDuration("dispatcher.delay"))
 
-		err = subscription.CheckOutDatedSubscriptionTypes(db, 100)
+		err := subscription.CheckOutDatedSubscriptionTypes(db, 100)
 		if err != nil {
 			log.Error(err)
 		}

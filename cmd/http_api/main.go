@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -48,20 +49,23 @@ func main() {
 	flag.Parse()
 
 	log.SetLevel(log.DebugLevel)
-	viper.SetEnvPrefix("SUB_API")
-	viper.SetConfigName("subapi_config")
 
-	viper.AutomaticEnv()
+	viper.SetConfigName("subapi_config")
 
 	viper.SetConfigType("yaml")
 
 	viper.AddConfigPath("/etc/subscription_api")
 	viper.AddConfigPath(".")
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err)
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			log.Fatal(err)
+		}
 	}
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
+	viper.AutomaticEnv()
+
 
 	types.RegisterE621()
 	types.RegisterRSS()
@@ -87,7 +91,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         ":8000",
+		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
