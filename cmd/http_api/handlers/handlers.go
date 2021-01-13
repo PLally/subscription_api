@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/lib/pq"
 	"github.com/plally/subscription_api/database"
-	"github.com/plally/subscription_api/subscription"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -28,12 +27,12 @@ type Resource struct {
 	model  interface{}
 }
 
-func resources(r *mux.Router, model interface{}, DB *gorm.DB) *Resource {
+func Resources(r *mux.Router, model interface{}, DB *gorm.DB) *Resource {
 	resource := &Resource{
-		Create: createHandler(model, DB),
-		Index:  indexHandler(model, DB),
-		Delete: deleteHandler(model, DB),
-		Get:    getHandler(model, DB),
+		Create: CreateHandler(model, DB),
+		Index:  IndexHandler(model, DB),
+		Delete: DeleteHandler(model, DB),
+		Get:    GetHandler(model, DB),
 
 		model: model,
 	}
@@ -80,7 +79,7 @@ func constructWhere(values url.Values, isAllowed func(string) bool) (string, []i
 	return strings.Join(condition, " AND "), conditionValues
 }
 
-func indexHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
+func IndexHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	t := reflect.TypeOf(model)
 	modelType := reflect.SliceOf(
 		t,
@@ -108,7 +107,7 @@ func indexHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func getHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
+func GetHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	modelType := reflect.TypeOf(model)
 	name := DB.NamingStrategy.TableName(modelType.Name())
 
@@ -137,7 +136,7 @@ func getHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
+func CreateHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	modelType := reflect.TypeOf(model)
 	name := DB.NamingStrategy.TableName(modelType.Name())
 
@@ -175,7 +174,7 @@ func createHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func deleteHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
+func DeleteHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 	modelType := reflect.TypeOf(model)
 	name := DB.NamingStrategy.TableName(modelType.Name())
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -197,56 +196,6 @@ func deleteHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 
 }
 
-func subscribeHandler(DB *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		data, _ := ioutil.ReadAll(r.Body)
-		var subCreateStruct struct {
-			DestinationType       string `json:"destination_type"`
-			DestinationIdentifier string `json:"destination_identifier"`
-			SubscriptionType      string `json:"subscription_type"`
-			SubscriptionTags      string `json:"subscription_tags"`
-		}
-		_ = json.Unmarshal(data, &subCreateStruct)
-		handler := subscription.GetSubTypeHandler(subCreateStruct.SubscriptionType)
-		if handler == nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Invalid subscription type"))
-			return
-		}
-		tags, err := handler.Validate(subCreateStruct.SubscriptionTags)
-		subCreateStruct.SubscriptionTags = tags
-		if err != nil {
-			log.Info(err)
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Invalid subscription type tags"))
-			return
-		}
-
-		subtype := database.SubscriptionType{
-			Type: subCreateStruct.SubscriptionType,
-			Tags: subCreateStruct.SubscriptionTags,
-		}
-		dest := database.Destination{
-			DestinationType:    subCreateStruct.DestinationType,
-			ExternalIdentifier: subCreateStruct.DestinationIdentifier,
-		}
-
-		DB.FirstOrCreate(&subtype, subtype)
-		DB.FirstOrCreate(&dest, dest)
-
-		sub := database.Subscription{
-			SubscriptionTypeID: subtype.ID,
-			DestinationID:      dest.ID,
-		}
-		status := http.StatusOK
-		if DB.FirstOrCreate(&sub, sub).RowsAffected == 0 {
-			status = http.StatusConflict
-		}
-		sub.Destination = dest
-		sub.SubscriptionType = subtype
-		writeJson(w, sub, status)
-	}
-}
 
 func writeJson(w http.ResponseWriter, obj interface{}, status int) {
 	data, err := json.Marshal(obj)

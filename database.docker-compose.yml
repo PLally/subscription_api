@@ -1,0 +1,11 @@
+version: "3.3"
+services:
+  db:
+    image: postgres
+    volumes:
+      - /home/pierce/.tmp/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: subs
+    ports:
+      - "5432:5432"
