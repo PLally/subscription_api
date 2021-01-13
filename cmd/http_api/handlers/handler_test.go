@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"bytes"
@@ -21,9 +21,9 @@ func maketestdb() *gorm.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		"127.0.0.1",
 		"5432",
-		"dev",
-		"fox",
-		"fox_bot_dev",
+		"postgres",
+		"password",
+		"subs",
 	)
 
 	db, err := gorm.Open(postgres.Open(psqlInfo), nil)
@@ -62,7 +62,7 @@ func TestSubscriptionServer_CreateDestination(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	DB := maketestdb()
-	createHandler(database.Destination{}, DB)(recorder, req)
+	CreateHandler(database.Destination{}, DB)(recorder, req)
 	defer teardown(DB)
 
 	result := recorder.Result()
@@ -95,7 +95,7 @@ func TestSubscriptionServer_IndexDestinations(t *testing.T) {
 	var destinations []database.Destination
 	recorder := httptest.NewRecorder()
 
-	indexHandler(database.Destination{}, db)(recorder, req)
+	IndexHandler(database.Destination{}, db)(recorder, req)
 
 	data, _ := ioutil.ReadAll(recorder.Result().Body)
 	json.Unmarshal(data, &destinations)
@@ -117,7 +117,7 @@ func TestSubscriptionServer_GetDestination(t *testing.T) {
 	})
 
 	recorder := httptest.NewRecorder()
-	getHandler(database.Destination{}, db)(recorder, req)
+	GetHandler(database.Destination{}, db)(recorder, req)
 
 	var dest database.Destination
 	data, _ := ioutil.ReadAll(recorder.Result().Body)

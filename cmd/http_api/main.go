@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/plally/subscription_api/cmd/http_api/handlers"
 	"github.com/plally/subscription_api/database"
 	"github.com/plally/subscription_api/internal/auth"
 	"github.com/plally/subscription_api/types"
@@ -18,7 +19,7 @@ import (
 	"time"
 )
 
-var noauth = flag.Bool("noauth", true, "dont use any authentication")
+var noauth = flag.Bool("noauth", false, "dont use any authentication")
 
 func makedb() *gorm.DB {
 
@@ -73,10 +74,12 @@ func main() {
 
 	DB := makedb()
 
-	resources(r, database.Destination{}, DB)
-	resources(r, database.Subscription{}, DB)
-	resources(r, database.SubscriptionType{}, DB).Use(CheckSubscriptionType)
-	r.HandleFunc("/subscribe", subscribeHandler(DB))
+	handlers.Resources(r, database.Destination{}, DB)
+	handlers.Resources(r, database.Subscription{}, DB)
+	handlers.Resources(r, database.SubscriptionType{}, DB).Use(CheckSubscriptionType)
+	r.HandleFunc("/subscribe", handlers.SubscribeHandler(DB))
+	r.HandleFunc("/unsubscribe", handlers.UnsubscribeHandler(DB))
+	r.HandleFunc("/list", handlers.ListHandler(DB))
 
 	if *noauth {
 		log.Warn("Starting with no authentication middleware!!!")
