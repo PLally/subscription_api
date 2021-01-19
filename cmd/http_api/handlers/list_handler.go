@@ -14,7 +14,7 @@ func ListHandler(DB *gorm.DB) http.HandlerFunc {
 			DestinationType: r.URL.Query().Get("destination_type"),
 		}
 		DB.First(&dest, dest)
-
+		DB = database.Subscription{}.DoJoins(DB)
 		DB.Model(database.Subscription{}).Where("destination_id = ?", dest.ID).Find(&subscriptions)
 		writeJson(w, subscriptions, http.StatusOK)
 	}
