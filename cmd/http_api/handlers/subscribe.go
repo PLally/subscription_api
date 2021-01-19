@@ -47,7 +47,6 @@ func SubscribeHandler(DB *gorm.DB) http.HandlerFunc {
 		DB.FirstOrCreate(&dest, dest)
 		DB.FirstOrCreate(&subtype, subtype)
 
-
 		sub := database.Subscription{
 			SubscriptionTypeID: subtype.ID,
 			DestinationID:      dest.ID,
@@ -58,6 +57,7 @@ func SubscribeHandler(DB *gorm.DB) http.HandlerFunc {
 		}
 		sub.Destination = dest
 		sub.SubscriptionType = subtype
+
 		writeJson(w, sub, status)
 	}
 }

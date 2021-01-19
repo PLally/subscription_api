@@ -205,6 +205,7 @@ func writeJson(w http.ResponseWriter, obj interface{}, status int) {
 		w.Write([]byte("Internal server error"))
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(data)
 }
