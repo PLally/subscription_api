@@ -23,13 +23,18 @@ func (r *RSSHandler) GetNewItems(tags string) []subscription.SubscriptionItem {
 		log.Debug(tags)
 	}
 
+
 	for _, item := range feed.Items {
+		authorName := "-"
+		if item.Author != nil {
+			authorName = item.Author.Name
+		}
 		subItem := subscription.SubscriptionItem{
 			Title:       item.Title,
 			Url:         item.Link,
 			Image:       getImage(item),
 			Description: "-",
-			Author:      item.Author.Name,
+			Author:      authorName,
 			TimeID:      item.PublishedParsed.Unix(),
 		}
 		items = append(items, subItem)
