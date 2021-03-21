@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "github.com/plally/subscription_api/proto";
+
+message Destination {
+  string identifier = 1;
+  string type = 2;
+  uint32 id = 3;
+}
+
+message SubscriptionSource {
+  string tags = 1;
+  string type = 2;
+  uint32 id = 3;
+}
+message Subscription {
+  Destination destination = 1;
+  SubscriptionSource subscription_source = 2;
+  uint32 id = 3;
+}
+
+service subscription_api {
+  rpc Subscribe(Subscription) returns (Subscription);
+}
