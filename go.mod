@@ -16,7 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.6.3
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
-	google.golang.org/grpc v1.36.0 // indirect
+	google.golang.org/grpc v1.36.0
 	google.golang.org/protobuf v1.26.0
 	gorm.io/driver/postgres v1.0.0
 	gorm.io/gorm v1.20.0
