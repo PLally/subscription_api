@@ -51,7 +51,7 @@ func (s *server) Subscribe(ctx context.Context, newSubscription *proto.Subscript
 			Type:       dest.DestinationType,
 			Id:         uint32(dest.ID),
 		},
-		SubscriptionSource: proto.SubscriptionSource{
+		SubscriptionSource: &proto.SubscriptionSource{
 			Tags: subtype.Tags,
 			Type: subtype.Type,
 			Id:   uint32(subtype.ID),
