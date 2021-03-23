@@ -196,7 +196,6 @@ func DeleteHandler(model interface{}, DB *gorm.DB) http.HandlerFunc {
 
 }
 
-
 func writeJson(w http.ResponseWriter, obj interface{}, status int) {
 	data, err := json.Marshal(obj)
 	if err != nil {

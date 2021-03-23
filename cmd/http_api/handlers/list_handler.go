@@ -11,7 +11,7 @@ func ListHandler(DB *gorm.DB) http.HandlerFunc {
 		var subscriptions []database.Subscription
 		dest := database.Destination{
 			ExternalIdentifier: r.URL.Query().Get("destination_identifier"),
-			DestinationType: r.URL.Query().Get("destination_type"),
+			DestinationType:    r.URL.Query().Get("destination_type"),
 		}
 		DB.First(&dest, dest)
 		db := DB.Model(database.Subscription{}).Where("destination_id = ?", dest.ID)
