@@ -16,9 +16,20 @@ message SubscriptionSource {
 message Subscription {
   Destination destination = 1;
   SubscriptionSource subscription_source = 2;
+
   uint32 id = 3;
+}
+
+message SubscriptionList {
+  repeated Subscription subscriptions = 1;
+}
+
+message Success {
+  bool success = 1;
 }
 
 service subscription_api {
   rpc Subscribe(Subscription) returns (Subscription);
+  rpc UnSubscribe(Subscription) returns (Success);
+  rpc ListSubscriptions(Destination) returns (SubscriptionList);
 }

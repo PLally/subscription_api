@@ -1,16 +1,13 @@
 package main
 
 import (
-	"context"
-	"errors"
-	"github.com/plally/subscription_api/database"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"github.com/plally/subscription_api/proto"
-	"github.com/plally/subscription_api/subscription"
+	"github.com/plally/subscription_api/types"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 	"net"
-	"os"
 )
 
 type server struct {
@@ -18,55 +15,20 @@ type server struct {
 	database *gorm.DB
 }
 
-func (s *server) Subscribe(ctx context.Context, newSubscription *proto.Subscription) (*proto.Subscription, error) {
-	handler := subscription.GetSubTypeHandler(newSubscription.GetSubscriptionSource().GetType())
-
-	tags, err := handler.Validate(newSubscription.GetSubscriptionSource().GetTags())
-	if err != nil {
-
-	}
-
-	subtype := database.SubscriptionType{
-		Type: newSubscription.GetSubscriptionSource().GetType(),
-		Tags: tags,
-	}
-	dest := database.Destination{
-		DestinationType:    newSubscription.GetDestination().GetType(),
-		ExternalIdentifier: newSubscription.GetDestination().GetIdentifier(),
-	}
-
-	s.database.FirstOrCreate(&dest, dest)
-	s.database.FirstOrCreate(&subtype, subtype)
-
-	sub := database.Subscription{
-		SubscriptionTypeID: subtype.ID,
-		DestinationID:      dest.ID,
-	}
-	if s.database.FirstOrCreate(&sub, sub).RowsAffected == 0 {
-		return nil, errors.New("subscription already created")
-	}
-	return &proto.Subscription{
-		Destination:        &proto.Destination{
-			Identifier: dest.ExternalIdentifier,
-			Type:       dest.DestinationType,
-			Id:         uint32(dest.ID),
-		},
-		SubscriptionSource: &proto.SubscriptionSource{
-			Tags: subtype.Tags,
-			Type: subtype.Type,
-			Id:   uint32(subtype.ID),
-		},
-		Id: uint32(sub.ID),
-	}, nil
-}
-
 func main() {
-	lis, err := net.Listen("tcp", os.Getenv("RPC_ADDR"))
+	types.RegisterE621()
+	lis, err := net.Listen("tcp", ":8181")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
-	proto.RegisterSubscriptionApiServer(s, &server{})
+
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(authFunc)),
+	)
+
+	proto.RegisterSubscriptionApiServer(s, &server{
+		database: connectToDatabase(),
+	})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
