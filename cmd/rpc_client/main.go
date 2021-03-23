@@ -9,7 +9,6 @@ import (
 	"os"
 )
 
-
 type tokenAuth struct {
 	token string
 }
@@ -23,7 +22,6 @@ func (t tokenAuth) GetRequestMetadata(ctx context.Context, in ...string) (map[st
 func (tokenAuth) RequireTransportSecurity() bool {
 	return false
 }
-
 
 func main() {
 	jwtToken := os.Getenv("subscription_api_token")

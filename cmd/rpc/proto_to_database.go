@@ -7,7 +7,7 @@ import (
 
 func SubscriptionDatabaseToProto(sub *database.Subscription) *proto.Subscription {
 	return &proto.Subscription{
-		Destination:        &proto.Destination{
+		Destination: &proto.Destination{
 			Identifier: sub.Destination.ExternalIdentifier,
 			Type:       sub.Destination.DestinationType,
 			Id:         uint32(sub.Destination.ID),
@@ -17,6 +17,6 @@ func SubscriptionDatabaseToProto(sub *database.Subscription) *proto.Subscription
 			Type: sub.SubscriptionType.Type,
 			Id:   uint32(sub.SubscriptionType.ID),
 		},
-		Id:	uint32(sub.ID),
+		Id: uint32(sub.ID),
 	}
 }

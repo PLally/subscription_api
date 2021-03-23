@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/plally/subscription_api/database"
 	"github.com/plally/subscription_api/subscription"
-	"net/http"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"io/ioutil"
-	"encoding/json"
-	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 func UnsubscribeHandler(DB *gorm.DB) http.HandlerFunc {
@@ -51,7 +51,6 @@ func UnsubscribeHandler(DB *gorm.DB) http.HandlerFunc {
 			SubscriptionTypeID: subtype.ID,
 			DestinationID:      dest.ID,
 		}
-
 
 		status := http.StatusNoContent
 

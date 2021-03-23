@@ -6,7 +6,7 @@ import (
 	"github.com/plally/subscription_api/proto"
 )
 
-func (s *server) ListSubscriptions(ctx context.Context, destination *proto.Destination) (*proto.SubscriptionList, error){
+func (s *server) ListSubscriptions(ctx context.Context, destination *proto.Destination) (*proto.SubscriptionList, error) {
 	var subscriptions []database.Subscription
 	dest := database.Destination{
 		ExternalIdentifier: destination.Identifier,
@@ -17,7 +17,7 @@ func (s *server) ListSubscriptions(ctx context.Context, destination *proto.Desti
 
 	db = database.Subscription{}.DoJoins(db)
 	db.Find(&subscriptions)
-	
+
 	protoSubscriptions := make([]*proto.Subscription, len(subscriptions), len(subscriptions))
 	for i, sub := range subscriptions {
 		protoSubscriptions[i] = SubscriptionDatabaseToProto(&sub)

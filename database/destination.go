@@ -16,4 +16,3 @@ type Destination struct {
 func (dest Destination) String() string {
 	return fmt.Sprintf("[%v] %v - %v", dest.ID, dest.DestinationType, dest.ExternalIdentifier)
 }
-

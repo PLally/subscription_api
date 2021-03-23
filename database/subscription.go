@@ -23,7 +23,6 @@ func (s Subscription) DoJoins(db *gorm.DB) *gorm.DB {
 	return db.Joins("Destination").Joins("SubscriptionType")
 }
 
-
 type Joinable interface {
 	DoJoins(db *gorm.DB) *gorm.DB
 }

@@ -23,7 +23,6 @@ func (r *RSSHandler) GetNewItems(tags string) []subscription.SubscriptionItem {
 		log.Debug(tags)
 	}
 
-
 	for _, item := range feed.Items {
 		authorName := "-"
 		if item.Author != nil {

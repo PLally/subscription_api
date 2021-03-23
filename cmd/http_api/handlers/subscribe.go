@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/plally/subscription_api/database"
 	"github.com/plally/subscription_api/subscription"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 	"gorm.io/gorm"
 	"io/ioutil"
-	"encoding/json"
+	"net/http"
 )
 
 func SubscribeHandler(DB *gorm.DB) http.HandlerFunc {
@@ -61,4 +61,3 @@ func SubscribeHandler(DB *gorm.DB) http.HandlerFunc {
 		writeJson(w, sub, status)
 	}
 }
-
