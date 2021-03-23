@@ -1,4 +1,6 @@
 .idea/*
+*.key.pub
+*.key
 secret
 subapi_config.yaml
 

@@ -19,6 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SubscriptionApiClient interface {
 	Subscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error)
+	UnSubscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Success, error)
+	ListSubscriptions(ctx context.Context, in *Destination, opts ...grpc.CallOption) (*SubscriptionList, error)
 }
 
 type subscriptionApiClient struct {
@@ -38,11 +40,31 @@ func (c *subscriptionApiClient) Subscribe(ctx context.Context, in *Subscription,
 	return out, nil
 }
 
+func (c *subscriptionApiClient) UnSubscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Success, error) {
+	out := new(Success)
+	err := c.cc.Invoke(ctx, "/subscription_api/UnSubscribe", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *subscriptionApiClient) ListSubscriptions(ctx context.Context, in *Destination, opts ...grpc.CallOption) (*SubscriptionList, error) {
+	out := new(SubscriptionList)
+	err := c.cc.Invoke(ctx, "/subscription_api/ListSubscriptions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SubscriptionApiServer is the server API for SubscriptionApi service.
 // All implementations must embed UnimplementedSubscriptionApiServer
 // for forward compatibility
 type SubscriptionApiServer interface {
 	Subscribe(context.Context, *Subscription) (*Subscription, error)
+	UnSubscribe(context.Context, *Subscription) (*Success, error)
+	ListSubscriptions(context.Context, *Destination) (*SubscriptionList, error)
 	mustEmbedUnimplementedSubscriptionApiServer()
 }
 
@@ -52,6 +74,12 @@ type UnimplementedSubscriptionApiServer struct {
 
 func (UnimplementedSubscriptionApiServer) Subscribe(context.Context, *Subscription) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
+}
+func (UnimplementedSubscriptionApiServer) UnSubscribe(context.Context, *Subscription) (*Success, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribe not implemented")
+}
+func (UnimplementedSubscriptionApiServer) ListSubscriptions(context.Context, *Destination) (*SubscriptionList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSubscriptions not implemented")
 }
 func (UnimplementedSubscriptionApiServer) mustEmbedUnimplementedSubscriptionApiServer() {}
 
@@ -84,6 +112,42 @@ func _SubscriptionApi_Subscribe_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SubscriptionApi_UnSubscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Subscription)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SubscriptionApiServer).UnSubscribe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/subscription_api/UnSubscribe",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SubscriptionApiServer).UnSubscribe(ctx, req.(*Subscription))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SubscriptionApi_ListSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Destination)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SubscriptionApiServer).ListSubscriptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/subscription_api/ListSubscriptions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SubscriptionApiServer).ListSubscriptions(ctx, req.(*Destination))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SubscriptionApi_ServiceDesc is the grpc.ServiceDesc for SubscriptionApi service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -94,6 +158,14 @@ var SubscriptionApi_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Subscribe",
 			Handler:    _SubscriptionApi_Subscribe_Handler,
+		},
+		{
+			MethodName: "UnSubscribe",
+			Handler:    _SubscriptionApi_UnSubscribe_Handler,
+		},
+		{
+			MethodName: "ListSubscriptions",
+			Handler:    _SubscriptionApi_ListSubscriptions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
