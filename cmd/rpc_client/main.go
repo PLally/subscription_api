@@ -30,7 +30,7 @@ func main() {
 	credentials := tokenAuth{jwtToken}
 
 	conn, err := grpc.Dial(
-		"127.0.0.1:8181",
+		"subrpc.foxorsomething.net",
 		grpc.WithInsecure(),
 		grpc.WithPerRPCCredentials(credentials),
 	)

@@ -6,4 +6,6 @@ COPY . .
 
 RUN go build -o /bin/rpc ./cmd/rpc
 
+WORKDIR /
+
 CMD ["/bin/rpc"]
