@@ -16,7 +16,7 @@ func (s *server) UnSubscribe(ctx context.Context, subscriptionToDelete *proto.Su
 	}
 	tags, err := handler.Validate(subscriptionToDelete.GetSubscriptionSource().GetTags())
 	if err != nil {
-		return &proto.Success{Success: false}, err
+		return &proto.Success{Success: false}, status.Error(codes.InvalidArgument,  err.Error())
 	}
 
 	subtype := database.SubscriptionType{

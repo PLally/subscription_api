@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
+	"io/ioutil"
 	"log"
-	"os"
 )
 
 type tokenAuth struct {
@@ -27,8 +27,8 @@ func (tokenAuth) RequireTransportSecurity() bool {
 }
 
 func main() {
-	jwtToken := os.Getenv("subscription_api_token")
-	creds := tokenAuth{jwtToken}
+	jwtToken, _ := ioutil.ReadFile("jwt.key")
+	creds := tokenAuth{string(jwtToken)}
 
 	conn, err := grpc.Dial(
 		"subrpc.foxorsomething.net:443",
