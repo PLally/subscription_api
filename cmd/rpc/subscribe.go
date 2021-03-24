@@ -19,7 +19,7 @@ func (s *server) Subscribe(ctx context.Context, newSubscription *proto.Subscript
 
 	tags, err := handler.Validate(newSubscription.GetSubscriptionSource().GetTags())
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	subtype := database.SubscriptionType{
