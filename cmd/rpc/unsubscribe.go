@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"github.com/plally/subscription_api/database"
 	"github.com/plally/subscription_api/proto"
 	"github.com/plally/subscription_api/subscription"
@@ -13,7 +12,7 @@ import (
 func (s *server) UnSubscribe(ctx context.Context, subscriptionToDelete *proto.Subscription) (*proto.Success, error) {
 	handler := subscription.GetSubTypeHandler(subscriptionToDelete.GetSubscriptionSource().GetType())
 	if handler == nil {
-		return &proto.Success{Success: false}, errors.New("handler does not exist")
+		return &proto.Success{Success: false}, ErrTypeDoesNotExist
 	}
 	tags, err := handler.Validate(subscriptionToDelete.GetSubscriptionSource().GetTags())
 	if err != nil {

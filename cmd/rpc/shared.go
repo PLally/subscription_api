@@ -1,9 +1,12 @@
 package main
 
 import (
+	"errors"
 	"github.com/plally/subscription_api/database"
 	"github.com/plally/subscription_api/proto"
 )
+
+var ErrTypeDoesNotExist = errors.New("type does not exist")
 
 func SubscriptionDatabaseToProto(sub *database.Subscription) *proto.Subscription {
 	return &proto.Subscription{
