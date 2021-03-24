@@ -15,6 +15,7 @@ type server struct {
 	database *gorm.DB
 }
 
+
 func main() {
 	types.RegisterE621()
 	lis, err := net.Listen("tcp", ":8181")

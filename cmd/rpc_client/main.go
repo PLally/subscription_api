@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/plally/subscription_api/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 	"os"
 )
@@ -42,10 +44,29 @@ func main() {
 		Identifier: "509187820980797470",
 		Type:       "discord",
 	})
+
 	if err != nil {
 		log.Fatalf("eeeeeee: %v", err)
 	}
 	for _, sub := range r.GetSubscriptions() {
 		fmt.Println(sub.SubscriptionSource.Tags)
 	}
+
+	sub, err := c.Subscribe(context.Background(), &proto.Subscription{
+		Destination:        &proto.Destination{
+			Identifier: "509187820980797470",
+			Type:       "discord",
+		},
+		SubscriptionSource: &proto.SubscriptionSource{
+			Tags: "letodoesart",
+			Type: "e621",
+		},
+	})
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println(status.Code(err) == codes.AlreadyExists)
+	}
+
+	fmt.Println(sub.Id)
+
 }
