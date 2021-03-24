@@ -1,8 +1,6 @@
 version: "3.3"
 services:
   rpc:
-    depends_on:
-      - db
     build:
       context: .
       dockerfile: rpc.Dockerfile
@@ -12,8 +10,6 @@ services:
       - .env
 
   dispatcher:
-    depends_on:
-      - db
     build:
       context: .
       dockerfile: dispatcher.Dockerfile
