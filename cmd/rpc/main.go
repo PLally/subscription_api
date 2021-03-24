@@ -15,7 +15,7 @@ type server struct {
 	proto.UnimplementedSubscriptionApiServer
 	database *gorm.DB
 }
-q
+
 func main() {
 	types.RegisterE621()
 	lis, err := net.Listen("tcp", ":8181")

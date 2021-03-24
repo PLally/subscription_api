@@ -16,7 +16,7 @@ require (
 	github.com/plally/e621 v0.0.0-20200507071926-d91da2bde984
 	github.com/plally/vulpes_authenticator v0.1.1
 	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/viper v1.7.1 // indirect
+	github.com/spf13/viper v1.7.1
 	google.golang.org/grpc v1.36.0
 	google.golang.org/protobuf v1.26.0
 	gorm.io/driver/postgres v1.0.0
