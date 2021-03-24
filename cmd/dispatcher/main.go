@@ -19,13 +19,6 @@ import (
 func main() {
 	log.SetLevel(log.InfoLevel)
 
-	viper.SetConfigName("subapi_config")
-
-	viper.SetConfigType("yaml")
-
-	viper.AddConfigPath("/etc/subscription_api")
-	viper.AddConfigPath(".")
-
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			log.Fatal(err)
@@ -53,7 +46,7 @@ func main() {
 // TODO get rid of code duplication in http_api and this package
 func makedb() *gorm.DB {
 
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
 		viper.GetString("database.host"),
 		viper.GetString("database.port"),
 		viper.GetString("database.user"),
