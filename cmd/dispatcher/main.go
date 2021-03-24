@@ -49,7 +49,7 @@ func makedb() *gorm.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
 		viper.GetString("database.host"),
 		viper.GetString("database.port"),
-		viper.GetString("database.user"),
+		viper.GetString("database.username"),
 		viper.GetString("database.password"),
 		viper.GetString("database.dbname"),
 	)
