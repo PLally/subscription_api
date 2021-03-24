@@ -6,6 +6,8 @@ services:
       dockerfile: rpc.Dockerfile
     ports:
       - "$RPC_PORT:8080"
+    volumes:
+      - "$JWT_PUBLIC_KEY_FILE:/jwt.key.pub"
     env_file:
       - .env
 
