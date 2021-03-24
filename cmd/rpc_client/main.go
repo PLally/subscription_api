@@ -6,6 +6,7 @@ import (
 	"github.com/plally/subscription_api/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 	"log"
 	"os"
@@ -27,12 +28,12 @@ func (tokenAuth) RequireTransportSecurity() bool {
 
 func main() {
 	jwtToken := os.Getenv("subscription_api_token")
-	credentials := tokenAuth{jwtToken}
+	creds := tokenAuth{jwtToken}
 
 	conn, err := grpc.Dial(
-		"subrpc.foxorsomething.net",
-		grpc.WithInsecure(),
-		grpc.WithPerRPCCredentials(credentials),
+		"subrpc.foxorsomething.net:443",
+		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")),
+		grpc.WithPerRPCCredentials(creds),
 	)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
