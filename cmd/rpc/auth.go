@@ -7,14 +7,13 @@ import (
 	"github.com/plally/vulpes_authenticator/auth"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"os"
 )
 
 var jwtPublicKey *rsa.PublicKey
 
 func init() {
 	var err error
-	jwtPublicKey, err = auth.ReadPublicKey(os.Getenv("PUBLIC_KEY_FILE"))
+	jwtPublicKey, err = auth.ReadPublicKey("jwt.key.pub")
 	if err != nil {
 		panic(err)
 	}
