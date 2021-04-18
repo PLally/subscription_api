@@ -17,7 +17,6 @@ type server struct {
 }
 
 func main() {
-	types.RegisterE621()
 	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -38,4 +37,7 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+
+	types.RegisterE621()
+	types.RegisterRSS()
 }
