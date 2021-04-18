@@ -9,7 +9,7 @@ services:
     volumes:
       - "$JWT_PUBLIC_KEY_FILE:/jwt.key.pub"
       - "$TLS_CERT_FILE:/rpc-cert.pem"
-      - "$TLS_KEY_FILE/rpc-key.pem"
+      - "$TLS_KEY_FILE:/rpc-key.pem"
     env_file:
       - .env
 
