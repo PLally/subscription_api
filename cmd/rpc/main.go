@@ -34,10 +34,12 @@ func main() {
 	proto.RegisterSubscriptionApiServer(s, &server{
 		database: connectToDatabase(),
 	})
+
+	types.RegisterE621()
+	types.RegisterRSS()
+
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 
-	types.RegisterE621()
-	types.RegisterRSS()
 }
