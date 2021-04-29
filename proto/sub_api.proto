@@ -29,7 +29,7 @@ message Success {
   bool success = 1;
 }
 
-service subscription_api {
+service SubscriptionAPI {
   rpc Subscribe(Subscription) returns (Subscription);
   rpc UnSubscribe(Subscription) returns (Success);
   rpc ListSubscriptions(Destination) returns (SubscriptionList);
