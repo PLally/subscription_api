@@ -13,7 +13,7 @@ import (
 )
 
 type server struct {
-	proto.UnimplementedSubscriptionApiServer
+	proto.UnimplementedSubscriptionAPIServer
 	database *gorm.DB
 }
 
@@ -34,7 +34,7 @@ func main() {
 
 	s := grpc.NewServer(args...)
 
-	proto.RegisterSubscriptionApiServer(s, &server{
+	proto.RegisterSubscriptionAPIServer(s, &server{
 		database: connectToDatabase(),
 	})
 
