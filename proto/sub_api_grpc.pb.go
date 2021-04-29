@@ -14,158 +14,158 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// SubscriptionApiClient is the client API for SubscriptionApi service.
+// SubscriptionAPIClient is the client API for SubscriptionAPI service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type SubscriptionApiClient interface {
+type SubscriptionAPIClient interface {
 	Subscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error)
 	UnSubscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Success, error)
 	ListSubscriptions(ctx context.Context, in *Destination, opts ...grpc.CallOption) (*SubscriptionList, error)
 }
 
-type subscriptionApiClient struct {
+type subscriptionAPIClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewSubscriptionApiClient(cc grpc.ClientConnInterface) SubscriptionApiClient {
-	return &subscriptionApiClient{cc}
+func NewSubscriptionAPIClient(cc grpc.ClientConnInterface) SubscriptionAPIClient {
+	return &subscriptionAPIClient{cc}
 }
 
-func (c *subscriptionApiClient) Subscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error) {
+func (c *subscriptionAPIClient) Subscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error) {
 	out := new(Subscription)
-	err := c.cc.Invoke(ctx, "/subscription_api/Subscribe", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/SubscriptionAPI/Subscribe", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *subscriptionApiClient) UnSubscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Success, error) {
+func (c *subscriptionAPIClient) UnSubscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Success, error) {
 	out := new(Success)
-	err := c.cc.Invoke(ctx, "/subscription_api/UnSubscribe", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/SubscriptionAPI/UnSubscribe", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *subscriptionApiClient) ListSubscriptions(ctx context.Context, in *Destination, opts ...grpc.CallOption) (*SubscriptionList, error) {
+func (c *subscriptionAPIClient) ListSubscriptions(ctx context.Context, in *Destination, opts ...grpc.CallOption) (*SubscriptionList, error) {
 	out := new(SubscriptionList)
-	err := c.cc.Invoke(ctx, "/subscription_api/ListSubscriptions", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/SubscriptionAPI/ListSubscriptions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SubscriptionApiServer is the server API for SubscriptionApi service.
-// All implementations must embed UnimplementedSubscriptionApiServer
+// SubscriptionAPIServer is the server API for SubscriptionAPI service.
+// All implementations must embed UnimplementedSubscriptionAPIServer
 // for forward compatibility
-type SubscriptionApiServer interface {
+type SubscriptionAPIServer interface {
 	Subscribe(context.Context, *Subscription) (*Subscription, error)
 	UnSubscribe(context.Context, *Subscription) (*Success, error)
 	ListSubscriptions(context.Context, *Destination) (*SubscriptionList, error)
-	mustEmbedUnimplementedSubscriptionApiServer()
+	mustEmbedUnimplementedSubscriptionAPIServer()
 }
 
-// UnimplementedSubscriptionApiServer must be embedded to have forward compatible implementations.
-type UnimplementedSubscriptionApiServer struct {
+// UnimplementedSubscriptionAPIServer must be embedded to have forward compatible implementations.
+type UnimplementedSubscriptionAPIServer struct {
 }
 
-func (UnimplementedSubscriptionApiServer) Subscribe(context.Context, *Subscription) (*Subscription, error) {
+func (UnimplementedSubscriptionAPIServer) Subscribe(context.Context, *Subscription) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
-func (UnimplementedSubscriptionApiServer) UnSubscribe(context.Context, *Subscription) (*Success, error) {
+func (UnimplementedSubscriptionAPIServer) UnSubscribe(context.Context, *Subscription) (*Success, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribe not implemented")
 }
-func (UnimplementedSubscriptionApiServer) ListSubscriptions(context.Context, *Destination) (*SubscriptionList, error) {
+func (UnimplementedSubscriptionAPIServer) ListSubscriptions(context.Context, *Destination) (*SubscriptionList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListSubscriptions not implemented")
 }
-func (UnimplementedSubscriptionApiServer) mustEmbedUnimplementedSubscriptionApiServer() {}
+func (UnimplementedSubscriptionAPIServer) mustEmbedUnimplementedSubscriptionAPIServer() {}
 
-// UnsafeSubscriptionApiServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to SubscriptionApiServer will
+// UnsafeSubscriptionAPIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SubscriptionAPIServer will
 // result in compilation errors.
-type UnsafeSubscriptionApiServer interface {
-	mustEmbedUnimplementedSubscriptionApiServer()
+type UnsafeSubscriptionAPIServer interface {
+	mustEmbedUnimplementedSubscriptionAPIServer()
 }
 
-func RegisterSubscriptionApiServer(s grpc.ServiceRegistrar, srv SubscriptionApiServer) {
-	s.RegisterService(&SubscriptionApi_ServiceDesc, srv)
+func RegisterSubscriptionAPIServer(s grpc.ServiceRegistrar, srv SubscriptionAPIServer) {
+	s.RegisterService(&SubscriptionAPI_ServiceDesc, srv)
 }
 
-func _SubscriptionApi_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SubscriptionAPI_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Subscription)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SubscriptionApiServer).Subscribe(ctx, in)
+		return srv.(SubscriptionAPIServer).Subscribe(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/subscription_api/Subscribe",
+		FullMethod: "/SubscriptionAPI/Subscribe",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubscriptionApiServer).Subscribe(ctx, req.(*Subscription))
+		return srv.(SubscriptionAPIServer).Subscribe(ctx, req.(*Subscription))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SubscriptionApi_UnSubscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SubscriptionAPI_UnSubscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Subscription)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SubscriptionApiServer).UnSubscribe(ctx, in)
+		return srv.(SubscriptionAPIServer).UnSubscribe(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/subscription_api/UnSubscribe",
+		FullMethod: "/SubscriptionAPI/UnSubscribe",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubscriptionApiServer).UnSubscribe(ctx, req.(*Subscription))
+		return srv.(SubscriptionAPIServer).UnSubscribe(ctx, req.(*Subscription))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SubscriptionApi_ListSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SubscriptionAPI_ListSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Destination)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SubscriptionApiServer).ListSubscriptions(ctx, in)
+		return srv.(SubscriptionAPIServer).ListSubscriptions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/subscription_api/ListSubscriptions",
+		FullMethod: "/SubscriptionAPI/ListSubscriptions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubscriptionApiServer).ListSubscriptions(ctx, req.(*Destination))
+		return srv.(SubscriptionAPIServer).ListSubscriptions(ctx, req.(*Destination))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// SubscriptionApi_ServiceDesc is the grpc.ServiceDesc for SubscriptionApi service.
+// SubscriptionAPI_ServiceDesc is the grpc.ServiceDesc for SubscriptionAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var SubscriptionApi_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "subscription_api",
-	HandlerType: (*SubscriptionApiServer)(nil),
+var SubscriptionAPI_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "SubscriptionAPI",
+	HandlerType: (*SubscriptionAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Subscribe",
-			Handler:    _SubscriptionApi_Subscribe_Handler,
+			Handler:    _SubscriptionAPI_Subscribe_Handler,
 		},
 		{
 			MethodName: "UnSubscribe",
-			Handler:    _SubscriptionApi_UnSubscribe_Handler,
+			Handler:    _SubscriptionAPI_UnSubscribe_Handler,
 		},
 		{
 			MethodName: "ListSubscriptions",
-			Handler:    _SubscriptionApi_ListSubscriptions_Handler,
+			Handler:    _SubscriptionAPI_ListSubscriptions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
