@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"gorm.io/gorm"
 	"net"
+	"os"
 )
 
 type server struct {
@@ -21,15 +22,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	creds, err := credentials.NewServerTLSFromFile("rpc-cert.pem", "rpc-key.pem")
-	if err != nil {
-		log.Fatal("error loading tls: ", err)
+	args := []grpc.ServerOption{grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(authFunc))}
+	if _, ok := os.LookupEnv("INSECURE"); !ok {
+		creds, err := credentials.NewServerTLSFromFile("rpc-cert.pem", "rpc-key.pem")
+		if err != nil {
+			log.Fatal("error loading tls: ", err)
+		}
+		args = append(args, grpc.Creds(creds))
 	}
 
-	s := grpc.NewServer(
-		grpc.Creds(creds),
-		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(authFunc)),
-	)
+
+	s := grpc.NewServer(args...)
 
 	proto.RegisterSubscriptionApiServer(s, &server{
 		database: connectToDatabase(),
